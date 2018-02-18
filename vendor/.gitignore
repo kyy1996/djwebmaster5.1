@@ -1,4 +1,4 @@
 *
 !.gitignore
-!/kyy1996/
-!/kyy1996/*
+!kyy1996/
+!kyy1996/*
