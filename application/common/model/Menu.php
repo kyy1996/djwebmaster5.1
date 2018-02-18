@@ -2,6 +2,7 @@
 
 namespace app\common\model;
 
+use think\Loader;
 use think\Model;
 use think\model\concern\SoftDelete;
 
@@ -10,7 +11,9 @@ class Menu extends Model
     use SoftDelete;
 
     protected $type = [
-        'status' => 'integer'
+        'status' => 'boolean',
+        'is_dev' => 'boolean',
+        'hide'   => 'boolean'
     ];
 
     protected static $Tree  = [];
@@ -21,13 +24,10 @@ class Menu extends Model
      * 初始化处理
      * @access protected
      * @return void
-     * @throws \think\exception\DbException
      */
     protected static function init()
     {
-        $menu          = static::all(function (Query $query) {
-            $query->order("sort", "DESC")->order("id", "ASC");
-        });
+        $menu          = (new static)->order("sort", "DESC")->order("id", "ASC")->select();
         $menus         = $menu->toArray();
         static::$Menus = $menus;
         static::$Tree  = list2tree($menus);
@@ -100,21 +100,21 @@ class Menu extends Model
 
     public function getCurrentUri()
     {
-        $module     = Request::instance()->module();
-        $controller = Loader::parseName(Request::instance()->controller(), 0);
-        $action     = Request::instance()->action();
+        $module     = request()::module();
+        $controller = Loader::parseName(request()::controller(), 0);
+        $action     = request()::action();
         return $module . "/" . $controller . "/" . $action;
     }
 
     protected function setStatusAttr()
     {
-        if (Request::instance()->has("status")) return 1;
+        if (request()::has("status")) return 1;
         else return 0;
     }
 
     protected function setHideAttr()
     {
-        if (Request::instance()->has("hide")) return 1;
+        if (request()::has("hide")) return 1;
         else return 0;
     }
 }
