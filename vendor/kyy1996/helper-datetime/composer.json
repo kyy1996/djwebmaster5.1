@@ -1,0 +1,21 @@
+{
+    "name": "kyy1996/helper-datetime",
+    "description": "An optimized time maker based on the time helper by thinkphp.",
+    "type": "library",
+    "require": {
+        "topthink/think-helper": "^1.0"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "kyy1996",
+            "email": "system@kyy1996.com"
+        }
+    ],
+    "version": "1.0",
+    "autoload": {
+        "psr-4": {
+            "alen\\helper\\": "src"
+        }
+    }
+}
