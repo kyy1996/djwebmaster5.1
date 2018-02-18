@@ -1,0 +1,16 @@
+<?php
+
+namespace {%namespace%};
+
+use think\Validate;
+
+class {%className%} extends Validate
+{
+    protected $rule =   [
+        //
+    ];
+
+    protected $message  =   [
+        //
+    ];
+}

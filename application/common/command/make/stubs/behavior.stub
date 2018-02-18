@@ -1,0 +1,13 @@
+<?php
+
+namespace {%namespace%};
+
+use think\Request;
+
+class {%className%}
+{
+    public function run(Request $request, $params)
+    {
+        // 行为逻辑
+    }
+}
