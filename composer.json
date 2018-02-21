@@ -18,14 +18,14 @@
     "repositories": [
         {
             "type": "path",
-            "url": "../composer-packages/kyy1996/think-migration",
+            "url": "vendor/kyy1996/think-migration",
             "options": {
                "symlink": false
             }
         },
         {
             "type": "path",
-            "url": "../composer-packages/kyy1996/helper-datetime",
+            "url": "vendor/kyy1996/helper-datetime",
             "options": {
                 "symlink": false
             }
