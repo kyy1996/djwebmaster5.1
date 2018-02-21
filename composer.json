@@ -17,18 +17,12 @@
     ],
     "repositories": [
         {
-            "type": "path",
-            "url": "vendor/kyy1996/think-migration",
-            "options": {
-               "symlink": false
-            }
+            "type": "vcs",
+            "url": "https://github.com/kyy1996/think-migration.git"
         },
         {
-            "type": "path",
-            "url": "vendor/kyy1996/helper-datetime",
-            "options": {
-                "symlink": false
-            }
+            "type": "vcs",
+            "url": "https://github.com/kyy1996/helper-datatime.git"
         }
     ],
     "require": {
