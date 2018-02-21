@@ -33,8 +33,8 @@
         "topthink/think-helper": "^1.0",
         "topthink/think-image": "^1.0",
         "endroid/qr-code": "^3.2",
-        "kyy1996/think-migration": "^1.0",
-        "kyy1996/helper-datetime": "^1.0",
+        "kyy1996/think-migration": "dev-bugfix",
+        "kyy1996/helper-datetime": "dev-bugfix",
         "ramsey/uuid": "^3.7"
     },
     "autoload": {
