@@ -62,9 +62,19 @@ class JobApplication extends Model
         return $value === null ? request()::server('HTTP_USER_AGENT') : $value;
     }
 
+    /**
+     * 关联用户
+     * @param null $value
+     * @return int|null
+     * @throws \think\exception\DbException
+     */
     public function setUserIdAttr($value = null)
     {
-        return $value === null ? User::uid() : $value;
+        $value = $value ?? User::uid();
+        if ($value === null) return null;
+        $user = User::getOrFail($value);
+        $this->user()->associate($user);
+        return $user->getAttr('uid');
     }
 
     public function approve($reason = '')
@@ -81,5 +91,20 @@ class JobApplication extends Model
         $this->setAttr('reason', $reason);
         $this->setAttr('operator_user_id', User::uid());
         return $this->save();
+    }
+
+    /**
+     * 关联用户
+     * @param null $value
+     * @return int|null
+     * @throws \think\exception\DbException
+     */
+    public function setOperatorUserIdAttr($value = null)
+    {
+        $value = $value ?? User::uid();
+        if ($value === null) return null;
+        $user = User::getOrFail($value);
+        $this->operatorUser()->associate($user);
+        return $user->getAttr('uid');
     }
 }

@@ -16,6 +16,8 @@ class Menu extends Model
         'hide'   => 'boolean'
     ];
 
+    protected $auto = ['status', 'hide', 'is_dev'];
+
     protected static $Tree  = [];
     protected static $Menus = [];
 
@@ -33,21 +35,23 @@ class Menu extends Model
         static::$Tree  = list2tree($menus);
     }
 
-    public function getTree($all = true)
+    public function getTree($all = true, $depth = true)
     {
-        if ($all) return static::$Tree;
         static $visible_tree = [];
+        if ($all) return static::$Tree;
         if (!$visible_tree) {
             $visible_tree = list2tree($this->getMenu($all));
+            is_integer($depth) && $visible_tree = tree2tree($visible_tree, $depth);
         }
         return $visible_tree;
     }
 
     public function getMenu($all = true)
     {
+        static $visible_menus = null;
         if ($all) return static::$Menus;
-        static $visible_menus = [];
-        if (!$visible_menus) {
+        if ($visible_menus === null) {
+            $visible_menus = [];
             foreach (static::$Menus as $menu) {
                 if ($menu['status'] && !$menu['hide'])
                     $visible_menus[] = $menu;
@@ -61,18 +65,19 @@ class Menu extends Model
         $items  = [];
         $item   = $this->getMenuItem($id);
         $parent = $item;
-        do {
-            $items[$parent['id']] = $parent;
-        } while ($parent = $this->getMenuItem($parent['pid']));
-        return array_reverse($items);
+        do
+            array_unshift($items, $parent);
+        while ($parent = $this->getMenuItem($parent['pid']));
+        return $items;
     }
 
-    public function getMenuItem($value, $type = "id")
+    public function getMenuItem($value, $type = "id", $last = false)
     {
         $current = false;
         foreach (static::$Menus as $menu) {
-            if (strtolower($menu[$type]) == strtolower($value)) {
+            if (strtolower($menu[$type]) === strtolower($value)) {
                 $current = $menu;
+                if (!$last) break;
             }
         }
         return $current;
@@ -80,12 +85,12 @@ class Menu extends Model
 
     public function getNavigationInfo()
     {
-        $current         = $this->getMenuItem($this->getCurrentUri(), "url");
+        $current         = $this->getMenuItem($this->getCurrentUri(), 'uri');
         $navigation_tree = $this->getTree(false);
         $navigation_menu = $this->getMenu(false);
         $breadcrumb      = $this->getParents($current['id']);
         $title           = [];
-        foreach (array_reverse($breadcrumb) as $item) {
+        foreach ($breadcrumb as $item) {
             $title[] = $item['title'];
         }
         $info = [
@@ -103,18 +108,21 @@ class Menu extends Model
         $module     = request()::module();
         $controller = Loader::parseName(request()::controller(), 0);
         $action     = request()::action();
-        return $module . "/" . $controller . "/" . $action;
+        return $module . '/' . $controller . '/' . $action;
     }
 
-    protected function setStatusAttr()
+    public function setStatusAttr($status = null)
     {
-        if (request()::has("status")) return 1;
-        else return 0;
+        return !!$status;
     }
 
-    protected function setHideAttr()
+    public function setHideAttr($hide = null)
     {
-        if (request()::has("hide")) return 1;
-        else return 0;
+        return !!$hide;
+    }
+
+    public function setIsDevAttr($is_dev = null)
+    {
+        return !!$is_dev;
     }
 }

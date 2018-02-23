@@ -4,6 +4,7 @@ namespace app\common\model;
 
 use alen\helper\Datetime;
 use think\Model;
+use think\model\Collection;
 use think\model\concern\SoftDelete;
 
 class Activity extends Model
@@ -79,6 +80,75 @@ class Activity extends Model
             $name[] = $lecturer->name;
         }
         return $name;
+    }
+
+    /**
+     * 通过讲师得到活动列表
+     * @param        $lecturers
+     * @param string $type
+     * @param bool   $strict
+     * @return array|Collection
+     * @throws \think\exception\DbException
+     */
+    public static function getActivitiesByLecturers($lecturers, $type = 'uid', $strict = false)
+    {
+        return static::getActivitiesByJson($lecturers, 'lecturers.' . $type, $strict);
+    }
+
+    /**
+     * 通过活动地点地点得到活动列表
+     * @param        $locations
+     * @param string $type
+     * @param bool   $strict
+     * @return array|Collection
+     * @throws \think\exception\DbException
+     */
+    public static function getActivitiesByLocations($locations, $type = 'uid', $strict = false)
+    {
+        return static::getActivitiesByJson($locations, 'locations.' . $type, $strict);
+    }
+
+    /**
+     * 通过JSON条件得到活动列表
+     * @param        $needles
+     * @param string $type
+     * @param bool   $strict
+     * @return array|Collection
+     * @throws \think\exception\DbException
+     */
+    public static function getActivitiesByJson($needles, $type = 'lecturers.uid', $strict = false)
+    {
+        /** @var Collection $activities */
+        $activities = static::all();
+        $activities = $activities->toArray();
+        list($field, $type) = explode('.', $type);
+        $activities = array_filter($activities, function ($activity) use ($needles, $field, $type, $strict) {
+            $activity_fields = array_column($activity, $field);
+            if ($type) {
+                if (key_exists(0, $activity_fields))
+                    $type_lecturers = array_column($activity_fields, $type);
+                else {
+                    $type_lecturers = $activity_fields[$type];
+                }
+            } else {
+                $type_lecturers = $activity_fields;
+            }
+            sort($type_lecturers, SORT_STRING);
+            sort($lecturers, SORT_STRING);
+            if (!$strict)
+                foreach ($lecturers as $lecturer) {
+                    if (array_search($lecturer, $type_lecturers) !== false) return true;
+                }
+            else {
+                if ($type_lecturers === $lecturers) return true;
+            }
+            return false;
+        });
+        $activities = array_map(function ($value) {
+            return new Activity($value);
+        }, $activities);
+        $activities = new Collection($activities);
+        return $activities;
     }
 
     public function getLectureUidAttr()

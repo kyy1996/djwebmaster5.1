@@ -11,11 +11,16 @@ class Category extends Model
 
     public function parent()
     {
-        return $this->belongsTo(Category::class, 'pid');
+        return $this->belongsTo(static::class, 'pid');
     }
 
     public function article()
     {
         return $this->hasMany(Article::class);
+    }
+
+    public function children()
+    {
+        return $this->hasMany(static::class, 'pid');
     }
 }

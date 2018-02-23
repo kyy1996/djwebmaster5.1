@@ -6,7 +6,7 @@ use think\Model;
 
 class UserGroupAccess extends Model
 {
-    protected $pk = false;
+    protected $pk = ['uid', 'user_group_id'];
 
     public function user()
     {

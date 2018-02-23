@@ -18,8 +18,10 @@ class Attachment extends Model
     ];
     protected $auto = ['uuid', 'type', 'user_id', 'url'];
 
-    protected $fileType = [
-        'image'    => ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'tiff'],
+    protected $file = null;
+
+    protected static $fileType = [
+        'image'    => ['gif', 'jpg', 'jpeg', 'bmp', 'png', 'tiff', 'svg', 'wmf'],
         'audio'    => ['wav', 'mp3', 'ogg', 'wma', 'ape', 'flac', 'm4a'],
         'video'    => ['mp4', 'mkv', 'wmv', 'avi', 'rm', 'mpeg', 'rmvb'],
         'document' => ['doc', 'docx', 'txt', 'md', 'xls', 'xlsx', 'pdf', 'epub', 'ppt', 'pptx'],
@@ -27,9 +29,28 @@ class Attachment extends Model
         'other'    => []
     ];
 
+    /**
+     * 初始化处理
+     * @access protected
+     * @return void
+     */
+    protected static function init()
+    {
+        //绑定删除事件
+        static::afterDelete(function (Attachment $attachment) {
+            //删除记录后删除磁盘上对应的文件
+            $attachment->deleteFile();
+        });
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function photo()
+    {
+        return $this->hasMany(Photo::class);
     }
 
     /**
@@ -63,9 +84,19 @@ class Attachment extends Model
         return $value === null ? $this->getFileType(pathinfo($this->getAttr('filename'), PATHINFO_EXTENSION)) : $value;
     }
 
+    /**
+     * 关联用户
+     * @param null $value
+     * @return int|null
+     * @throws \think\exception\DbException
+     */
     public function setUserIdAttr($value = null)
     {
-        return $value === null ? User::uid() : $value;
+        $value = $value ?? User::uid();
+        if ($value === null) return null;
+        $user = User::getOrFail($value);
+        $this->user()->associate($user);
+        return $user->getAttr('uid');
     }
 
     public function setUrlAttr($value = null)
@@ -81,7 +112,7 @@ class Attachment extends Model
     private function getFileType($extension)
     {
         $file_type = 'other';
-        foreach ($this->fileType as $file_type => $extensions)
+        foreach (static::$fileType as $file_type => $extensions)
             if (in_array($extension, $extensions)) return $file_type;
         return $file_type;
     }
@@ -95,5 +126,26 @@ class Attachment extends Model
         $base_url = static::UPLOAD_PATH;
         $base_url .= $this->getAttr('filename');
         return $base_url;
+    }
+
+    /**
+     * 得到附件对应文件对象
+     * @return File
+     */
+    public function getFile()
+    {
+        $file = $this->file ?: ($this->file = new File($this->getAttr('path')));
+        return $file;
+    }
+
+    /**
+     * 删除文件
+     * @return bool
+     */
+    public function deleteFile()
+    {
+        $file = $this->getFile();
+        if (!$file->isFile() || !$file->isWritable()) return false;
+        return unlink($file->getRealPath());
     }
 }

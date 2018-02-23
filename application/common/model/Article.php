@@ -37,7 +37,27 @@ class Article extends Model
 
     public function parent()
     {
-        return $this->belongsTo(Article::class, 'pid');
+        return $this->belongsTo(static::class, 'pid');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(static::class, 'pid');
+    }
+
+    public function jobs()
+    {
+        return $this->hasMany(Job::class);
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
+
+    public function coverImg()
+    {
+        return $this->belongsTo(Attachment::class, 'cover_img_id')->bind(['url' => 'cover_img_url']);
     }
 
     public function publishUser()
@@ -92,22 +112,22 @@ class Article extends Model
      * @return Attachment|null
      * @throws \think\exception\DbException
      */
-    public function getCoverImgAttr()
+    /*public function getCoverImgAttr()
     {
         $value = $this->getAttr('cover_img_id');
         return $value ? Attachment::getOrFail($value) : null;
-    }
+    }*/
 
     /**
      * 获取封面图URL
      * @return null|string
      * @throws \think\exception\DbException
      */
-    public function getCoverImgUrlAttr()
+    /*public function getCoverImgUrlAttr()
     {
         $attachment = $this->getCoverImgAttr();
         return $attachment ? $attachment->getAttr('url') : null;
-    }
+    }*/
 
     /**
      * 得到附件数组属性
@@ -180,13 +200,33 @@ class Article extends Model
         return $this->setIpAttr($value);
     }
 
+    /**
+     * 关联用户
+     * @param null $value
+     * @return int|null
+     * @throws \think\exception\DbException
+     */
     public function setPublishUserIdAttr($value = null)
     {
-        return $value === null ? User::uid() : $value;
+        $value = $value ?? User::uid();
+        if ($value === null) return null;
+        $user = User::getOrFail($value);
+        $this->publishUser()->associate($user);
+        return $user->getAttr('uid');
     }
 
+    /**
+     * 关联用户
+     * @param null $value
+     * @return int|null
+     * @throws \think\exception\DbException
+     */
     public function setUpdateUserIdAttr($value = null)
     {
-        return $value === null ? User::uid() : $value;
+        $value = $value ?? User::uid();
+        if ($value === null) return null;
+        $user = User::getOrFail($value);
+        $this->updateUser()->associate($user);
+        return $user->getAttr('uid');
     }
 }

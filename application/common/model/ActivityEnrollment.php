@@ -45,8 +45,18 @@ class ActivityEnrollment extends Model
         return $value === null ? request()::server('HTTP_USER_AGENT') : $value;
     }
 
+    /**
+     * 关联用户
+     * @param null $value
+     * @return int|null
+     * @throws \think\exception\DbException
+     */
     public function setUserIdAttr($value = null)
     {
-        return $value === null ? User::uid() : $value;
+        $value = $value ?? User::uid();
+        if ($value === null) return null;
+        $user = User::getOrFail($value);
+        $this->user()->associate($user);
+        return $user->getAttr('uid');
     }
 }

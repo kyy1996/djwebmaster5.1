@@ -24,8 +24,31 @@ class Blacklist extends Model
         return $this->belongsTo(User::class, 'operator_user_id');
     }
 
+    /**
+     * 关联用户
+     * @param null $value
+     * @return int|null
+     * @throws \think\exception\DbException
+     */
     public function setOperatorUserIdAttr($value = null)
     {
-        return $value === null ? User::uid() : $value;
+        $value = $value ?? User::uid();
+        if ($value === null) return null;
+        $user = User::getOrFail($value);
+        $this->operatorUser()->associate($user);
+        return $user->getAttr('uid');
+    }
+
+    /**
+     * 关联用户
+     * @param int $value
+     * @return int|null
+     * @throws \think\exception\DbException
+     */
+    public function setUserIdAttr(int $value)
+    {
+        $user = User::getOrFail($value);
+        $this->user()->associate($user);
+        return $value;
     }
 }
