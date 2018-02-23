@@ -1,7 +1,6 @@
 <?php
 
 use think\migration\Migrator;
-use think\migration\db\Column;
 
 class CreateUserTable extends Migrator
 {
@@ -32,6 +31,7 @@ class CreateUserTable extends Migrator
         $table
             ->addColumn('email', 'string', ['comment' => 'Email地址'])
             ->addColumn('password', 'string', ['limit' => 64, 'comment' => '密码'])
+            ->addColumn('password_hashed', 'string', ['limit' => 64, 'comment' => '加密后的密码'])
             ->addColumn('password_salt', 'string', ['default' => rand(1000, 9999), 'comment' => '密码加密盐值'])
             ->addColumn('avatar', 'string', ['default' => '', 'comment' => '头像URL'])
             ->addColumn('mobile', 'string', ['comment' => '手机号'])
