@@ -85,7 +85,7 @@ class User extends Model
      * @return array|\think\model\Collection
      * @throws DbException
      */
-    public function hostedActivities()
+    public function getHostedActivitiesAttr()
     {
         return Activity::getActivitiesByLecturers([$this->getAttr('uid')]);
     }

@@ -25,33 +25,48 @@ class CommonConfig extends Model
     }
 
     /**
-     * 得到属性
-     * @param string|null            $name
+     * 得到属性，支持批量读取
+     * @param string|null|array      $name
      * @param string|\stdClass|array $default
      * @return string|\stdClass|array
      * @throws \think\exception\DbException
      */
-    public static function getProperty(string $name = null, $default = null)
+    public static function getProperty($name = null, $default = null)
     {
         if (static::$properties === null) static::init();
         if ($name === null) return static::$properties;
-        $value = static::$properties[$name] ?? $default;
-        $value = json_decode($value) ?: $value;
+        if (is_string($name)) {
+            $value = static::$properties[$name] ?? $default;
+            $value = json_decode($value) ?: $value;
+        } else {
+            $value = [];
+            foreach ($name as $index => $key) {
+                $value[$key] = static::getProperty($key, is_array($default) ? $default[$index] : $default);
+            }
+        }
         return $value;
     }
 
     /**
-     * 设置属性
-     * @param string                 $name
+     * 设置属性，支持批量设置
+     * @param string|array           $name
      * @param string|\stdClass|array $value
      * @return integer
      * @throws \think\exception\DbException
      */
-    public static function setProperty(string $name, $value)
+    public static function setProperty($name, $value = null)
     {
         if (static::$properties === null) static::init();
-        $value                     = json_encode($value) ?: $value;
-        static::$properties[$name] = $value;
-        return (new static)->insert(['name' => $name, 'value' => $value], true);
+        if (is_string($name)) {
+            $value                     = json_encode($value) ?: $value;
+            static::$properties[$name] = $value;
+            return (new static)->insert(['name' => $name, 'value' => $value], true);
+        } else {
+            $data = [];
+            foreach ($name as $key => $value) {
+                $data[] = ['name' => $key, 'value' => json_encode($value) ?: $value];
+            }
+            return (new static())->insertAll($data, true);
+        }
     }
 }

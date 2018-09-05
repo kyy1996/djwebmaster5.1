@@ -99,3 +99,13 @@ if (!function_exists('tree2tree')) {
         return $result;
     }
 }
+
+if (!function_exists('auth')) {
+    /**
+     * @return \app\common\authentication\AuthenticationManager|object
+     */
+    function auth()
+    {
+        return app('authentication');
+    }
+}

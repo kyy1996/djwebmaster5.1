@@ -10,15 +10,19 @@
 // +----------------------------------------------------------------------
 
 //use think\facade\Route;
+Route::get('/', function () {
+});
 
 Route::get('think', function () {
     return 'hello,ThinkPHP5!';
 });
 
-Route::get('hello/:name', 'index/hello');
 
 Route::group('v1', function () {
     //API路由
+    Route::group('api', function () {
+        Route::resource('users', 'api/users');
+    });
 });
 
 return [
